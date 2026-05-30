@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<!-- saved from url=(0064)file:///C:/Users/Manas/Downloads/investment_dashboard%20(1).html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Investment Dashboard</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,22 +17,31 @@
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Arial, sans-serif;
   }
   body { font-family: var(--font); background: var(--bg3); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
-  .app { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+  .app { max-width: 1000px; margin: 0 auto; padding: 28px 20px; }
 
   /* Header */
   .dash-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-  .dash-title { font-size: 20px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .dash-title svg { color: var(--purple); }
-  .dash-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
-  .tx-count { font-size: 12px; color: var(--text3); padding: 4px 10px; background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; white-space: nowrap; }
+  .dash-title { font-size: 20px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .dash-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .tx-count { font-size: 12px; color: var(--text3); padding: 4px 10px; background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; }
+  .last-updated { font-size: 11px; color: var(--text3); }
 
-  /* Metric cards */
+  /* Loading / error states */
+  .state-box { text-align: center; padding: 60px 20px; color: var(--text2); }
+  .state-box .icon { font-size: 40px; margin-bottom: 12px; }
+  .state-box h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .state-box p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Metrics */
   .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
   @media(max-width:640px){ .metrics { grid-template-columns: repeat(2,1fr); } }
-  .mcard { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; position: relative; }
-  .mcard-icon { position: absolute; right: 14px; top: 14px; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-  .mcard-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
-  .mcard-value { font-size: 24px; font-weight: 700; line-height: 1.1; margin-bottom: 4px; }
+  .mcard { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; position: relative; }
+  .mcard-icon { position: absolute; right: 14px; top: 14px; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .mcard-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+  .mcard-value { font-size: 22px; font-weight: 700; line-height: 1.15; margin-bottom: 4px; }
   .mcard-value.pos { color: var(--green); }
   .mcard-value.neg { color: var(--red); }
   .mcard-value.neutral { color: var(--text); }
@@ -42,32 +51,17 @@
   .section-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
   .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
 
-  /* Form */
-  .input-grid { display: grid; grid-template-columns: 1fr 1.4fr 1.2fr 1fr 1fr auto; gap: 10px; align-items: end; }
-  @media(max-width:700px){ .input-grid { grid-template-columns: 1fr 1fr; } }
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 12px; font-weight: 500; color: var(--text2); }
-  .field input, .field select {
-    width: 100%; padding: 8px 10px; font-size: 13px; font-family: var(--font);
-    border: 1px solid var(--border2); border-radius: var(--radius);
-    background: var(--bg); color: var(--text); outline: none;
-    transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(83,74,183,0.12); }
-  .btn-add {
-    display: flex; align-items: center; gap: 6px; padding: 9px 20px;
-    font-size: 13px; font-weight: 600; font-family: var(--font);
-    background: var(--green); color: #fff; border: none;
-    border-radius: var(--radius); cursor: pointer; white-space: nowrap;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .btn-add:hover { background: var(--green-dark); }
-  .btn-add:active { transform: scale(0.97); }
-  .err { font-size: 12px; color: var(--red); margin-top: 8px; min-height: 18px; }
-
   /* Filters */
   .filter-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
-  .filter-row .field select { min-width: 130px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--text2); }
+  .field select, .field input {
+    padding: 8px 10px; font-size: 13px; font-family: var(--font);
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--bg); color: var(--text); outline: none;
+    transition: border-color 0.15s; min-width: 130px;
+  }
+  .field select:focus, .field input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(83,74,183,0.1); }
   .btn-clear {
     display: flex; align-items: center; gap: 5px; padding: 8px 14px;
     font-size: 12px; font-family: var(--font); color: var(--text2);
@@ -79,13 +73,13 @@
   /* Tabs */
   .tabs { display: flex; gap: 4px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 5px; margin-bottom: 16px; }
   .tab {
-    flex: 1; padding: 8px 12px; border: 1px solid transparent; border-radius: var(--radius);
+    flex: 1; padding: 8px 10px; border: 1px solid transparent; border-radius: var(--radius);
     font-size: 12px; font-weight: 500; font-family: var(--font);
     cursor: pointer; background: transparent; color: var(--text2);
     transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px;
   }
   .tab:hover:not(.active) { background: var(--bg); color: var(--text); }
-  .tab.active { background: var(--bg); color: var(--text); border-color: var(--border2); font-weight: 600; }
+  .tab.active { background: var(--bg); color: var(--text); border-color: var(--border2); font-weight: 700; }
 
   /* Chart card */
   .chart-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
@@ -97,42 +91,39 @@
   @media(max-width:540px){ .two-col { grid-template-columns: 1fr; } }
 
   /* Table */
-  .tbl-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .tbl-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
   .tbl-title { font-size: 13px; font-weight: 600; color: var(--text); }
   .export-btns { display: flex; gap: 8px; }
   .btn-export {
     display: flex; align-items: center; gap: 6px; padding: 7px 14px;
     font-size: 12px; font-weight: 500; font-family: var(--font);
     border: 1px solid var(--border2); border-radius: var(--radius);
-    background: var(--bg); color: var(--text2); cursor: pointer;
-    transition: background 0.15s;
+    background: var(--bg); color: var(--text2); cursor: pointer; transition: background 0.15s;
   }
   .btn-export:hover { background: var(--bg2); color: var(--text); }
   .btn-export.excel { border-color: rgba(29,158,117,0.4); color: var(--green-dark); }
   .btn-export.excel:hover { background: var(--green-bg); }
-  .btn-export.csv { border-color: rgba(24,95,165,0.4); color: var(--blue); }
-  .btn-export.csv:hover { background: var(--blue-bg); }
+  .btn-export.csv-btn { border-color: rgba(24,95,165,0.4); color: var(--blue); }
+  .btn-export.csv-btn:hover { background: var(--blue-bg); }
   .tbl-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-  th {
-    text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3);
-    background: var(--bg2); border-bottom: 1px solid var(--border);
-  }
+  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3); background: var(--bg2); border-bottom: 1px solid var(--border); }
   td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   tr:last-child td { border-bottom: none; }
   tbody tr:hover td { background: var(--bg2); }
   .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
   .badge.in { background: var(--green-bg); color: var(--green-text); }
   .badge.out { background: var(--red-bg); color: var(--red-text); }
-  .btn-del {
-    padding: 4px 10px; font-size: 11px; font-family: var(--font);
-    color: var(--text3); border: 1px solid var(--border); border-radius: var(--radius);
-    background: transparent; cursor: pointer; transition: all 0.15s;
-  }
-  .btn-del:hover { color: var(--red); border-color: var(--red-bg); background: var(--red-bg); }
   .empty { text-align: center; color: var(--text3); padding: 40px 20px; font-size: 13px; }
-  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* Reload button */
+  .btn-reload {
+    display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+    font-size: 12px; font-weight: 500; font-family: var(--font);
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--bg); color: var(--text2); cursor: pointer; transition: background 0.15s;
+  }
+  .btn-reload:hover { background: var(--bg2); color: var(--text); }
 </style>
 </head>
 <body>
@@ -142,253 +133,213 @@
   <div class="dash-header">
     <div>
       <div class="dash-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#534AB7"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Investment dashboard
       </div>
-      <div class="dash-sub">Track inflows &amp; outflows across clients, products and time</div>
+      <div class="dash-sub">Live view from data.csv — refresh page to see latest data</div>
     </div>
-    <span class="tx-count" id="txCount">3 records</span>
-  </div>
-
-  <!-- Metric cards -->
-  <div class="metrics" id="metrics">
-    <div class="mcard">
-      <div class="mcard-icon" style="background:#E1F5EE">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-      </div>
-      <div class="mcard-label">Total inflow</div>
-      <div class="mcard-value pos">₹140</div>
-      <div class="mcard-sub">2 transactions</div>
-    </div>
-    <div class="mcard">
-      <div class="mcard-icon" style="background:#FAECE7">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#993C1D" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
-      </div>
-      <div class="mcard-label">Total outflow</div>
-      <div class="mcard-value neg">₹50</div>
-      <div class="mcard-sub">1 transactions</div>
-    </div>
-    <div class="mcard">
-      <div class="mcard-icon" style="background:#EEEDFE">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-      </div>
-      <div class="mcard-label">Net flow</div>
-      <div class="mcard-value pos">₹90</div>
-      <div class="mcard-sub">64% retention rate</div>
-    </div>
-    <div class="mcard">
-      <div class="mcard-icon" style="background:#E6F1FB">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-      </div>
-      <div class="mcard-label">Transactions</div>
-      <div class="mcard-value neutral">3</div>
-      <div class="mcard-sub">of 3 total</div>
-    </div></div>
-
-  <!-- Add transaction -->
-  <div class="section-card">
-    <div class="section-label">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      Add transaction
-    </div>
-    <div class="input-grid">
-      <div class="field"><label>Client</label><input id="iClient" placeholder="e.g. ab"></div>
-      <div class="field"><label>Product</label>
-        <select id="iProduct">
-          <option value="shares">Shares</option>
-          <option value="mutual funds">Mutual funds</option>
-          <option value="bonds">Bonds</option>
-          <option value="ETF">ETF</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <div class="field"><label>Date</label><input id="iDate" type="date"></div>
-      <div class="field"><label>Amount (₹)</label><input id="iAmount" type="number" placeholder="0" min="0"></div>
-      <div class="field"><label>Type</label>
-        <select id="iType"><option value="inflow">Inflow</option><option value="outflow">Outflow</option></select>
-      </div>
-      <button class="btn-add" onclick="addRow()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Add
-      </button>
-    </div>
-    <div class="err" id="addError"></div>
-  </div>
-
-  <!-- Filters -->
-  <div class="section-card">
-    <div class="section-label">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-      Filters
-    </div>
-    <div class="filter-row">
-      <div class="field"><label>Client</label><select id="fClient" onchange="render()"><option value="">All clients</option><option value="ab">AB</option><option value="bc">BC</option><option value="himanshu">HIMANSHU</option></select></div>
-      <div class="field"><label>Product</label><select id="fProduct" onchange="render()"><option value="">All products</option><option value="mutual funds">mutual funds</option><option value="shares">shares</option></select></div>
-      <div class="field"><label>Month</label><select id="fMonth" onchange="render()"><option value="">All months</option><option value="2026-05">May 2026</option></select></div>
-      <div class="field"><label>Type</label>
-        <select id="fType" onchange="render()">
-          <option value="">Both</option>
-          <option value="inflow">Inflow only</option>
-          <option value="outflow">Outflow only</option>
-        </select>
-      </div>
-      <button class="btn-clear" onclick="clearFilters()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        Clear
+    <div class="header-right">
+      <span class="tx-count" id="txCount">Loading...</span>
+      <span class="last-updated" id="lastUpdated"></span>
+      <button class="btn-reload" onclick="loadData()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Refresh data
       </button>
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab" onclick="switchTab(&#39;overview&#39;,this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-      Overview
-    </button>
-    <button class="tab" onclick="switchTab(&#39;product&#39;,this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-      By product
-    </button>
-    <button class="tab" onclick="switchTab(&#39;client&#39;,this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-      By client
-    </button>
-    <button class="tab" onclick="switchTab(&#39;month&#39;,this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      By month
-    </button>
-    <button class="tab active" onclick="switchTab(&#39;table&#39;,this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path></svg>
-      Log
-    </button>
+  <!-- Main content (hidden until data loads) -->
+  <div id="loadingState">
+    <div class="section-card">
+      <div class="state-box">
+        <div class="spinner"></div>
+        <h3>Loading dashboard...</h3>
+        <p>Reading data.csv from the same folder.</p>
+      </div>
+    </div>
   </div>
 
-  <!-- Chart area -->
-  <div class="chart-card">
-
-    <div id="tab-overview" style="display: none;">
-      <div class="legend">
-        <span><span class="legend-dot" style="background:#1D9E75"></span>Inflow</span>
-        <span><span class="legend-dot" style="background:#D85A30"></span>Outflow</span>
-        <span><span class="legend-dot" style="background:#534AB7"></span>Net (line)</span>
-      </div>
-      <div class="chart-wrap" style="height:280px"><canvas id="cOverview" role="img" aria-label="Monthly inflow vs outflow bar chart" width="1318" height="420" style="display: block; box-sizing: border-box; height: 280px; width: 878px;">Monthly inflow vs outflow.</canvas></div>
-    </div>
-
-    <div id="tab-product" style="display:none">
-      <div class="legend">
-        <span><span class="legend-dot" style="background:#1D9E75"></span>Inflow</span>
-        <span><span class="legend-dot" style="background:#D85A30"></span>Outflow</span>
-      </div>
-      <div class="two-col">
-        <div class="chart-wrap" style="height:260px"><canvas id="cProductBar" role="img" aria-label="Product inflow bar chart">Product breakdown.</canvas></div>
-        <div class="chart-wrap" style="height:260px"><canvas id="cProductPie" role="img" aria-label="Product share donut chart">Product share.</canvas></div>
+  <div id="errorState" style="display:none">
+    <div class="section-card">
+      <div class="state-box">
+        <div class="icon">⚠️</div>
+        <h3>Could not load data.csv</h3>
+        <p>Make sure <strong>data.csv</strong> is in the same folder as this HTML file.<br/>
+        If you're opening this file directly from your computer, use a local server or upload both files to GitHub.</p>
       </div>
     </div>
+  </div>
 
-    <div id="tab-client" style="display: none;">
-      <div class="legend">
-        <span><span class="legend-dot" style="background:#1D9E75"></span>Net positive</span>
-        <span><span class="legend-dot" style="background:#D85A30"></span>Net negative</span>
+  <div id="mainContent" style="display:none">
+    <!-- Metrics -->
+    <div class="metrics" id="metrics"></div>
+
+    <!-- Filters -->
+    <div class="section-card">
+      <div class="section-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Filters
       </div>
-      <div class="chart-wrap" style="height: 212px;"><canvas id="cClient" role="img" aria-label="Client net flow bar chart" style="box-sizing: border-box; display: block; height: 212px; width: 878px;" width="1318" height="318">Client net flows.</canvas></div>
+      <div class="filter-row">
+        <div class="field"><label>Client</label><select id="fClient" onchange="render()"><option value="">All clients</option></select></div>
+        <div class="field"><label>Product</label><select id="fProduct" onchange="render()"><option value="">All products</option></select></div>
+        <div class="field"><label>Month</label><select id="fMonth" onchange="render()"><option value="">All months</option></select></div>
+        <div class="field"><label>Type</label>
+          <select id="fType" onchange="render()">
+            <option value="">Both</option>
+            <option value="inflow">Inflow only</option>
+            <option value="outflow">Outflow only</option>
+          </select>
+        </div>
+        <button class="btn-clear" onclick="clearFilters()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Clear
+        </button>
+      </div>
     </div>
 
-    <div id="tab-month" style="display:none">
-      <div class="legend">
-        <span><span class="legend-dot" style="background:#1D9E75"></span>Inflow</span>
-        <span><span class="legend-dot" style="background:#D85A30"></span>Outflow</span>
-      </div>
-      <div class="chart-wrap" style="height:280px"><canvas id="cMonth" role="img" aria-label="Month over month trend lines">Month over month.</canvas></div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('overview',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </button>
+      <button class="tab" onclick="switchTab('product',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        By product
+      </button>
+      <button class="tab" onclick="switchTab('client',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        By client
+      </button>
+      <button class="tab" onclick="switchTab('month',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        By month
+      </button>
+      <button class="tab" onclick="switchTab('table',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        Log
+      </button>
     </div>
 
-    <div id="tab-table" style="display: block;">
-      <div class="tbl-header">
-        <div class="tbl-title" id="tbl-count">3 transactions</div>
-        <div class="export-btns">
-          <button class="btn-export csv" onclick="exportCSV()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            Download CSV
-          </button>
-          <button class="btn-export excel" onclick="exportExcel()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            Download Excel
-          </button>
+    <!-- Chart area -->
+    <div class="chart-card">
+
+      <div id="tab-overview">
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1D9E75"></span>Inflow</span>
+          <span><span class="legend-dot" style="background:#D85A30"></span>Outflow</span>
+          <span><span class="legend-dot" style="background:#534AB7"></span>Net (line)</span>
+        </div>
+        <div class="chart-wrap" style="height:280px"><canvas id="cOverview" role="img" aria-label="Monthly inflow vs outflow">Monthly inflow vs outflow.</canvas></div>
+      </div>
+
+      <div id="tab-product" style="display:none">
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1D9E75"></span>Inflow</span>
+          <span><span class="legend-dot" style="background:#D85A30"></span>Outflow</span>
+        </div>
+        <div class="two-col">
+          <div class="chart-wrap" style="height:260px"><canvas id="cProductBar" role="img" aria-label="Product breakdown">Product breakdown.</canvas></div>
+          <div class="chart-wrap" style="height:260px"><canvas id="cProductPie" role="img" aria-label="Product share">Product share.</canvas></div>
         </div>
       </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr>
-            <th style="width:12%">Client</th>
-            <th style="width:22%">Product</th>
-            <th style="width:16%">Date</th>
-            <th style="width:18%">Amount</th>
-            <th style="width:18%">Type</th>
-            <th style="width:14%"></th>
-          </tr></thead>
-          <tbody id="tBody"><tr>
-      <td style="font-weight:600">HIMANSHU</td>
-      <td style="color:#5f5e5a">shares</td>
-      <td style="color:#5f5e5a">2026-05-30</td>
-      <td style="font-weight:600;color:#1D9E75">₹40</td>
-      <td><span class="badge in">↑ inflow</span></td>
-      <td><button class="btn-del" onclick="deleteRow(2)">Delete</button></td>
-    </tr><tr>
-      <td style="font-weight:600">BC</td>
-      <td style="color:#5f5e5a">mutual funds</td>
-      <td style="color:#5f5e5a">2026-05-03</td>
-      <td style="font-weight:600;color:#D85A30">₹50</td>
-      <td><span class="badge out">↓ outflow</span></td>
-      <td><button class="btn-del" onclick="deleteRow(1)">Delete</button></td>
-    </tr><tr>
-      <td style="font-weight:600">AB</td>
-      <td style="color:#5f5e5a">shares</td>
-      <td style="color:#5f5e5a">2026-05-01</td>
-      <td style="font-weight:600;color:#1D9E75">₹100</td>
-      <td><span class="badge in">↑ inflow</span></td>
-      <td><button class="btn-del" onclick="deleteRow(0)">Delete</button></td>
-    </tr></tbody>
-        </table>
-      </div>
-    </div>
 
+      <div id="tab-client" style="display:none">
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1D9E75"></span>Net positive</span>
+          <span><span class="legend-dot" style="background:#D85A30"></span>Net negative</span>
+        </div>
+        <div class="chart-wrap" style="height:280px"><canvas id="cClient" role="img" aria-label="Client net flows">Client net flows.</canvas></div>
+      </div>
+
+      <div id="tab-month" style="display:none">
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#1D9E75"></span>Inflow</span>
+          <span><span class="legend-dot" style="background:#D85A30"></span>Outflow</span>
+        </div>
+        <div class="chart-wrap" style="height:280px"><canvas id="cMonth" role="img" aria-label="Month over month trend">Month over month.</canvas></div>
+      </div>
+
+      <div id="tab-table" style="display:none">
+        <div class="tbl-header">
+          <div class="tbl-title" id="tbl-count"></div>
+          <div class="export-btns">
+            <button class="btn-export csv-btn" onclick="exportCSV()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Download CSV
+            </button>
+            <button class="btn-export excel" onclick="exportExcel()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Download Excel
+            </button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:12%">Client</th>
+              <th style="width:20%">Product</th>
+              <th style="width:16%">Date</th>
+              <th style="width:18%">Amount</th>
+              <th style="width:16%">Type</th>
+            </tr></thead>
+            <tbody id="tBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
-<script src="./Investment Dashboard_30_May_2026_files/chart.umd.js.download"></script>
-<script src="./Investment Dashboard_30_May_2026_files/xlsx.full.min.js.download"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-let data = [
-  {client:'ab', product:'shares', date:'2026-05-01', amount:100, type:'inflow'},
-  {client:'bc', product:'mutual funds', date:'2026-05-03', amount:50, type:'outflow'},
-];
+let allData = [];
 let charts = {};
 let activeTab = 'overview';
 
 const C_IN = '#1D9E75', C_OUT = '#D85A30', C_NET = '#534AB7';
-const C_PROD = ['#534AB7','#1D9E75','#D85A30','#185FA5','#BA7517','#993556'];
+const C_PROD = ['#534AB7','#1D9E75','#D85A30','#185FA5','#BA7517','#993556','#0F6E56','#712B13'];
 
-function fmt(n){ return '₹' + n.toLocaleString('en-IN', {minimumFractionDigits:0, maximumFractionDigits:0}); }
+function fmt(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
 function monthLabel(ym){ const [y,m] = ym.split('-'); return new Date(+y,+m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'}); }
 
-function addRow(){
-  const c = document.getElementById('iClient').value.trim();
-  const p = document.getElementById('iProduct').value;
-  const d = document.getElementById('iDate').value;
-  const a = parseFloat(document.getElementById('iAmount').value);
-  const t = document.getElementById('iType').value;
-  const err = document.getElementById('addError');
-  if(!c || !d || isNaN(a) || a <= 0){ err.textContent = 'Please fill in client, date and a valid positive amount.'; return; }
-  err.textContent = '';
-  data.push({client: c.toLowerCase(), product: p, date: d, amount: a, type: t});
-  document.getElementById('iClient').value = '';
-  document.getElementById('iAmount').value = '';
-  render();
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    const row = {};
+    headers.forEach((h,i) => row[h] = vals[i] || '');
+    return {
+      client: (row['client'] || '').toUpperCase(),
+      product: row['product'] || '',
+      date: row['date'] || '',
+      amount: parseFloat(row['amount']) || 0,
+      type: (row['type'] || '').toLowerCase()
+    };
+  }).filter(r => r.client && r.date && r.amount > 0 && (r.type === 'inflow' || r.type === 'outflow'));
 }
 
-function clearFilters(){
-  ['fClient','fProduct','fMonth','fType'].forEach(id => document.getElementById(id).value = '');
-  render();
+async function loadData(){
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('errorState').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'none';
+  try {
+    const res = await fetch('data.csv?t=' + Date.now());
+    if(!res.ok) throw new Error('Not found');
+    const text = await res.text();
+    allData = parseCSV(text);
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('lastUpdated').textContent = 'Last refreshed: ' + new Date().toLocaleTimeString('en-IN');
+    render();
+  } catch(e) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'block';
+  }
 }
 
 function filtered(){
@@ -396,9 +347,9 @@ function filtered(){
   const fp = document.getElementById('fProduct').value;
   const fm = document.getElementById('fMonth').value;
   const ft = document.getElementById('fType').value;
-  return data.filter(r => {
+  return allData.filter(r => {
     const mon = r.date.slice(0,7);
-    return (!fc || r.client === fc) && (!fp || r.product === fp) && (!fm || mon === fm) && (!ft || r.type === ft);
+    return (!fc||r.client===fc) && (!fp||r.product===fp) && (!fm||mon===fm) && (!ft||r.type===ft);
   });
 }
 
@@ -410,204 +361,189 @@ function setOpts(id, ph, arr, lbl){
 }
 
 function populateFilters(){
-  const clients = [...new Set(data.map(r => r.client))].sort();
-  const products = [...new Set(data.map(r => r.product))].sort();
-  const months = [...new Set(data.map(r => r.date.slice(0,7)))].sort();
-  setOpts('fClient','All clients', clients, v => v.toUpperCase());
+  const clients = [...new Set(allData.map(r => r.client))].sort();
+  const products = [...new Set(allData.map(r => r.product))].sort();
+  const months = [...new Set(allData.map(r => r.date.slice(0,7)))].sort();
+  setOpts('fClient','All clients', clients, v => v);
   setOpts('fProduct','All products', products, v => v);
   setOpts('fMonth','All months', months, monthLabel);
 }
 
 function renderMetrics(rows){
-  const inflow = rows.filter(r => r.type==='inflow').reduce((s,r) => s+r.amount, 0);
-  const outflow = rows.filter(r => r.type==='outflow').reduce((s,r) => s+r.amount, 0);
+  const inflow = rows.filter(r=>r.type==='inflow').reduce((s,r)=>s+r.amount,0);
+  const outflow = rows.filter(r=>r.type==='outflow').reduce((s,r)=>s+r.amount,0);
   const net = inflow - outflow;
   const ratio = inflow > 0 ? Math.round((net/inflow)*100) : 0;
-  document.getElementById('txCount').textContent = data.length + ' records';
+  document.getElementById('txCount').textContent = allData.length + ' records total';
   document.getElementById('metrics').innerHTML = `
     <div class="mcard">
-      <div class="mcard-icon" style="background:#E1F5EE">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-      </div>
+      <div class="mcard-icon" style="background:#E1F5EE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
       <div class="mcard-label">Total inflow</div>
       <div class="mcard-value pos">${fmt(inflow)}</div>
       <div class="mcard-sub">${rows.filter(r=>r.type==='inflow').length} transactions</div>
     </div>
     <div class="mcard">
-      <div class="mcard-icon" style="background:#FAECE7">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#993C1D" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
-      </div>
+      <div class="mcard-icon" style="background:#FAECE7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#993C1D" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
       <div class="mcard-label">Total outflow</div>
       <div class="mcard-value neg">${fmt(outflow)}</div>
       <div class="mcard-sub">${rows.filter(r=>r.type==='outflow').length} transactions</div>
     </div>
     <div class="mcard">
-      <div class="mcard-icon" style="background:#EEEDFE">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
+      <div class="mcard-icon" style="background:#EEEDFE"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
       <div class="mcard-label">Net flow</div>
       <div class="mcard-value ${net>=0?'pos':'neg'}">${net<0?'-':''}${fmt(Math.abs(net))}</div>
       <div class="mcard-sub">${ratio}% retention rate</div>
     </div>
     <div class="mcard">
-      <div class="mcard-icon" style="background:#E6F1FB">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
+      <div class="mcard-icon" style="background:#E6F1FB"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
       <div class="mcard-label">Transactions</div>
       <div class="mcard-value neutral">${rows.length}</div>
-      <div class="mcard-sub">of ${data.length} total</div>
+      <div class="mcard-sub">of ${allData.length} total</div>
     </div>`;
 }
 
 function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
 const CD = {
-  responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { grid: { display: false }, ticks: { color: '#888780', font: { size: 11 }, autoSkip: false, maxRotation: 45 } },
-    y: { grid: { color: 'rgba(136,135,128,0.15)' }, ticks: { color: '#888780', font: { size: 11 }, callback: v => '₹' + v.toLocaleString('en-IN') } }
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{display:false} },
+  scales:{
+    x:{ grid:{display:false}, ticks:{color:'#888780',font:{size:11},autoSkip:false,maxRotation:45} },
+    y:{ grid:{color:'rgba(136,135,128,0.15)'}, ticks:{color:'#888780',font:{size:11},callback:v=>'₹'+Math.round(v).toLocaleString('en-IN')} }
   }
 };
 
 function renderOverview(rows){
   destroyChart('ov');
-  const months = [...new Set(rows.map(r => r.date.slice(0,7)))].sort();
-  const inArr = months.map(m => rows.filter(r => r.date.startsWith(m) && r.type==='inflow').reduce((s,r) => s+r.amount, 0));
-  const outArr = months.map(m => rows.filter(r => r.date.startsWith(m) && r.type==='outflow').reduce((s,r) => s+r.amount, 0));
-  const netArr = months.map((_,i) => inArr[i] - outArr[i]);
-  charts['ov'] = new Chart(document.getElementById('cOverview'), {type:'bar', data:{
-    labels: months.map(monthLabel),
-    datasets: [
-      {label:'Inflow', data:inArr, backgroundColor: C_IN+'CC', borderRadius:5, borderSkipped:false},
-      {label:'Outflow', data:outArr, backgroundColor: C_OUT+'CC', borderRadius:5, borderSkipped:false},
-      {label:'Net', data:netArr, type:'line', borderColor:C_NET, backgroundColor:'transparent', pointBackgroundColor:C_NET, pointRadius:4, pointHoverRadius:6, tension:0.35, borderWidth:2.5},
+  const months=[...new Set(rows.map(r=>r.date.slice(0,7)))].sort();
+  if(!months.length){document.getElementById('cOverview').parentElement.innerHTML='<div class="empty">No data for current filters</div>';return;}
+  const inArr=months.map(m=>rows.filter(r=>r.date.startsWith(m)&&r.type==='inflow').reduce((s,r)=>s+r.amount,0));
+  const outArr=months.map(m=>rows.filter(r=>r.date.startsWith(m)&&r.type==='outflow').reduce((s,r)=>s+r.amount,0));
+  const netArr=months.map((_,i)=>inArr[i]-outArr[i]);
+  charts['ov']=new Chart(document.getElementById('cOverview'),{type:'bar',data:{
+    labels:months.map(monthLabel),
+    datasets:[
+      {label:'Inflow',data:inArr,backgroundColor:C_IN+'CC',borderRadius:5,borderSkipped:false},
+      {label:'Outflow',data:outArr,backgroundColor:C_OUT+'CC',borderRadius:5,borderSkipped:false},
+      {label:'Net',data:netArr,type:'line',borderColor:C_NET,backgroundColor:'transparent',pointBackgroundColor:C_NET,pointRadius:4,pointHoverRadius:6,tension:0.35,borderWidth:2.5},
     ]
-  }, options:{...CD}});
+  },options:{...CD}});
 }
 
 function renderProduct(rows){
-  destroyChart('pb'); destroyChart('pp');
-  const prods = [...new Set(rows.map(r => r.product))].sort();
-  const inArr = prods.map(p => rows.filter(r => r.product===p && r.type==='inflow').reduce((s,r) => s+r.amount, 0));
-  const outArr = prods.map(p => rows.filter(r => r.product===p && r.type==='outflow').reduce((s,r) => s+r.amount, 0));
-  charts['pb'] = new Chart(document.getElementById('cProductBar'), {type:'bar', data:{
-    labels: prods,
-    datasets: [
-      {label:'Inflow', data:inArr, backgroundColor: C_IN+'CC', borderRadius:5},
-      {label:'Outflow', data:outArr, backgroundColor: C_OUT+'CC', borderRadius:5},
+  destroyChart('pb');destroyChart('pp');
+  const prods=[...new Set(rows.map(r=>r.product))].sort();
+  if(!prods.length){document.getElementById('cProductBar').parentElement.innerHTML='<div class="empty">No data</div>';return;}
+  const inArr=prods.map(p=>rows.filter(r=>r.product===p&&r.type==='inflow').reduce((s,r)=>s+r.amount,0));
+  const outArr=prods.map(p=>rows.filter(r=>r.product===p&&r.type==='outflow').reduce((s,r)=>s+r.amount,0));
+  charts['pb']=new Chart(document.getElementById('cProductBar'),{type:'bar',data:{
+    labels:prods,
+    datasets:[
+      {label:'Inflow',data:inArr,backgroundColor:C_IN+'CC',borderRadius:5},
+      {label:'Outflow',data:outArr,backgroundColor:C_OUT+'CC',borderRadius:5},
     ]
-  }, options:{...CD}});
-  const netArr = prods.map((_,i) => Math.max(0, inArr[i]-outArr[i]));
-  charts['pp'] = new Chart(document.getElementById('cProductPie'), {type:'doughnut', data:{
-    labels: prods,
-    datasets: [{data: netArr, backgroundColor: C_PROD.slice(0, prods.length), borderWidth:2, borderColor:'#fff', hoverOffset:6}]
-  }, options:{responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{legend:{position:'bottom', labels:{font:{size:11}, color:'#5f5e5a', boxWidth:11, padding:12}}}}});
+  },options:{...CD}});
+  const netArr=prods.map((_,i)=>Math.max(0,inArr[i]-outArr[i]));
+  charts['pp']=new Chart(document.getElementById('cProductPie'),{type:'doughnut',data:{
+    labels:prods,
+    datasets:[{data:netArr,backgroundColor:C_PROD.slice(0,prods.length),borderWidth:2,borderColor:'#fff',hoverOffset:6}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:11},color:'#5f5e5a',boxWidth:11,padding:12}}}}});
 }
 
 function renderClient(rows){
   destroyChart('cl');
-  const clients = [...new Set(rows.map(r => r.client))].sort();
-  const netArr = clients.map(c => {
-    const i = rows.filter(r => r.client===c && r.type==='inflow').reduce((s,r) => s+r.amount, 0);
-    const o = rows.filter(r => r.client===c && r.type==='outflow').reduce((s,r) => s+r.amount, 0);
-    return i - o;
+  const clients=[...new Set(rows.map(r=>r.client))].sort();
+  if(!clients.length){document.getElementById('cClient').parentElement.innerHTML='<div class="empty">No data</div>';return;}
+  const netArr=clients.map(c=>{
+    const i=rows.filter(r=>r.client===c&&r.type==='inflow').reduce((s,r)=>s+r.amount,0);
+    const o=rows.filter(r=>r.client===c&&r.type==='outflow').reduce((s,r)=>s+r.amount,0);
+    return i-o;
   });
-  const wrapH = Math.max(180, clients.length * 44 + 80);
-  document.querySelector('#tab-client .chart-wrap').style.height = wrapH + 'px';
-  charts['cl'] = new Chart(document.getElementById('cClient'), {type:'bar', data:{
-    labels: clients.map(c => c.toUpperCase()),
-    datasets: [{label:'Net flow', data:netArr, backgroundColor: netArr.map(v => v>=0 ? C_IN+'CC' : C_OUT+'CC'), borderRadius:5}]
-  }, options:{...CD}});
+  charts['cl']=new Chart(document.getElementById('cClient'),{type:'bar',data:{
+    labels:clients,
+    datasets:[{label:'Net flow',data:netArr,backgroundColor:netArr.map(v=>v>=0?C_IN+'CC':C_OUT+'CC'),borderRadius:5}]
+  },options:{...CD}});
 }
 
 function renderMonth(rows){
   destroyChart('mo');
-  const months = [...new Set(rows.map(r => r.date.slice(0,7)))].sort();
-  const inArr = months.map(m => rows.filter(r => r.date.startsWith(m) && r.type==='inflow').reduce((s,r) => s+r.amount, 0));
-  const outArr = months.map(m => rows.filter(r => r.date.startsWith(m) && r.type==='outflow').reduce((s,r) => s+r.amount, 0));
-  charts['mo'] = new Chart(document.getElementById('cMonth'), {type:'line', data:{
-    labels: months.map(monthLabel),
-    datasets: [
-      {label:'Inflow', data:inArr, borderColor:C_IN, backgroundColor:C_IN+'22', fill:true, tension:0.35, pointRadius:5, pointHoverRadius:7, borderWidth:2.5},
-      {label:'Outflow', data:outArr, borderColor:C_OUT, backgroundColor:C_OUT+'22', fill:true, tension:0.35, pointRadius:5, pointHoverRadius:7, borderWidth:2.5, borderDash:[6,4]},
+  const months=[...new Set(rows.map(r=>r.date.slice(0,7)))].sort();
+  if(!months.length){document.getElementById('cMonth').parentElement.innerHTML='<div class="empty">No data</div>';return;}
+  const inArr=months.map(m=>rows.filter(r=>r.date.startsWith(m)&&r.type==='inflow').reduce((s,r)=>s+r.amount,0));
+  const outArr=months.map(m=>rows.filter(r=>r.date.startsWith(m)&&r.type==='outflow').reduce((s,r)=>s+r.amount,0));
+  charts['mo']=new Chart(document.getElementById('cMonth'),{type:'line',data:{
+    labels:months.map(monthLabel),
+    datasets:[
+      {label:'Inflow',data:inArr,borderColor:C_IN,backgroundColor:C_IN+'22',fill:true,tension:0.35,pointRadius:5,pointHoverRadius:7,borderWidth:2.5},
+      {label:'Outflow',data:outArr,borderColor:C_OUT,backgroundColor:C_OUT+'22',fill:true,tension:0.35,pointRadius:5,pointHoverRadius:7,borderWidth:2.5,borderDash:[6,4]},
     ]
-  }, options:{...CD}});
+  },options:{...CD}});
 }
 
 function renderTable(rows){
-  const sorted = rows.slice().sort((a,b) => b.date.localeCompare(a.date));
-  document.getElementById('tbl-count').textContent = rows.length + ' transaction' + (rows.length!==1?'s':'');
-  const tbody = document.getElementById('tBody');
-  if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="6" class="empty"><div class="empty-icon">📭</div>No transactions match your filters</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = sorted.map(r => {
-    const idx = data.indexOf(r);
-    return `<tr>
-      <td style="font-weight:600">${r.client.toUpperCase()}</td>
-      <td style="color:#5f5e5a">${r.product}</td>
-      <td style="color:#5f5e5a">${r.date}</td>
-      <td style="font-weight:600;color:${r.type==='inflow'?'#1D9E75':'#D85A30'}">₹${r.amount.toLocaleString('en-IN')}</td>
-      <td><span class="badge ${r.type==='inflow'?'in':'out'}">${r.type==='inflow'?'↑':'↓'} ${r.type}</span></td>
-      <td><button class="btn-del" onclick="deleteRow(${idx})">Delete</button></td>
-    </tr>`;
-  }).join('');
+  const sorted=rows.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('tbl-count').textContent=rows.length+' transaction'+(rows.length!==1?'s':'');
+  const tbody=document.getElementById('tBody');
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="5" class="empty">No transactions match your filters</td></tr>`;return;}
+  tbody.innerHTML=sorted.map(r=>`<tr>
+    <td style="font-weight:600">${r.client}</td>
+    <td style="color:#5f5e5a">${r.product}</td>
+    <td style="color:#5f5e5a">${r.date}</td>
+    <td style="font-weight:600;color:${r.type==='inflow'?'#1D9E75':'#D85A30'}">${fmt(r.amount)}</td>
+    <td><span class="badge ${r.type==='inflow'?'in':'out'}">${r.type==='inflow'?'↑':'↓'} ${r.type}</span></td>
+  </tr>`).join('');
 }
 
-function deleteRow(idx){ data.splice(idx, 1); render(); }
-
-function exportCSV(){
-  const rows = filtered();
-  const hdr = 'Client,Product,Date,Amount,Type\n';
-  const body = rows.map(r => `${r.client},${r.product},${r.date},${r.amount},${r.type}`).join('\n');
-  const blob = new Blob([hdr + body], {type:'text/csv'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'transactions.csv';
-  a.click();
-}
-
-function exportExcel(){
-  const rows = filtered();
-  const wsData = [['Client','Product','Date','Amount','Type'], ...rows.map(r => [r.client, r.product, r.date, r.amount, r.type])];
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{wch:12},{wch:18},{wch:14},{wch:12},{wch:10}];
-  XLSX.utils.book_append_sheet(wb, 'Transactions', ws);
-  XLSX.writeFile(wb, 'transactions.xlsx');
+function clearFilters(){
+  ['fClient','fProduct','fMonth','fType'].forEach(id=>document.getElementById(id).value='');
+  render();
 }
 
 function render(){
   populateFilters();
-  const rows = filtered();
+  const rows=filtered();
   renderMetrics(rows);
-  if(activeTab==='overview') renderOverview(rows);
-  else if(activeTab==='product') renderProduct(rows);
-  else if(activeTab==='client') renderClient(rows);
-  else if(activeTab==='month') renderMonth(rows);
+  if(activeTab==='overview')renderOverview(rows);
+  else if(activeTab==='product')renderProduct(rows);
+  else if(activeTab==='client')renderClient(rows);
+  else if(activeTab==='month')renderMonth(rows);
   else renderTable(rows);
 }
 
-function switchTab(tab, btn){
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['overview','product','client','month','table'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  ['overview','product','client','month','table'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
   });
-  activeTab = tab;
-  const rows = filtered();
-  if(tab==='overview') renderOverview(rows);
-  else if(tab==='product') renderProduct(rows);
-  else if(tab==='client') renderClient(rows);
-  else if(tab==='month') renderMonth(rows);
+  activeTab=tab;
+  const rows=filtered();
+  if(tab==='overview')renderOverview(rows);
+  else if(tab==='product')renderProduct(rows);
+  else if(tab==='client')renderClient(rows);
+  else if(tab==='month')renderMonth(rows);
   else renderTable(rows);
 }
 
-document.getElementById('iDate').value = new Date().toISOString().slice(0,10);
-render();
+function exportCSV(){
+  const rows=filtered();
+  const hdr='Client,Product,Date,Amount,Type\n';
+  const body=rows.map(r=>`${r.client},${r.product},${r.date},${r.amount},${r.type}`).join('\n');
+  const blob=new Blob([hdr+body],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='transactions_export.csv';a.click();
+}
+
+function exportExcel(){
+  const rows=filtered();
+  const wsData=[['Client','Product','Date','Amount','Type'],...rows.map(r=>[r.client,r.product,r.date,r.amount,r.type])];
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:12},{wch:18},{wch:14},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,'Transactions',ws);
+  XLSX.writeFile(wb,'transactions_export.xlsx');
+}
+
+loadData();
 </script>
-
-
-</body></html>
+</body>
+</html>
