@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Investment Dashboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f6f6f4;--bg3:#f0efe9;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#8c8b85;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --green:#1D9E75;--green-dark:#0F6E56;--green-bg:#E1F5EE;--green-text:#085041;
+  --red:#D85A30;--red-dark:#993C1D;--red-bg:#FAECE7;--red-text:#712B13;
+  --purple:#534AB7;--blue:#185FA5;--blue-bg:#E6F1FB;
+  --radius:8px;--radius-lg:12px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Arial,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg3);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+.app{max-width:1000px;margin:0 auto;padding:28px 20px}
+
+/* Header */
+.dash-header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.dash-title{font-size:22px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px}
+
+/* State boxes */
+.state-box{text-align:center;padding:60px 20px;color:var(--text2);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.state-box h3{font-size:16px;font-weight:600;margin-bottom:6px;color:var(--text)}
+.state-box p{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* Metric cards */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:600px){.metrics{grid-template-columns:1fr}}
+.mcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px}
+.mcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mcard-label{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3)}
+.mcard-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mcard-value{font-size:26px;font-weight:700;line-height:1.1;margin-bottom:12px}
+.mcard-value.pos{color:var(--green)}
+.mcard-value.neg{color:var(--red)}
+.mcard-value.neutral{color:var(--purple)}
+.mcard-divider{height:1px;background:var(--border);margin-bottom:10px}
+.mcard-breakdown{display:flex;flex-direction:column;gap:6px}
+.mcard-row{display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.mcard-row-label{color:var(--text2);display:flex;align-items:center;gap:5px}
+.mcard-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mcard-row-val{font-weight:600}
+.mcard-row-val.pos{color:var(--green)}
+.mcard-row-val.neg{color:var(--red)}
+.mcard-row-val.neutral{color:var(--purple)}
+
+/* Chart card */
+.chart-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px}
+.chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.chart-sub{font-size:12px;color:var(--text3);margin-bottom:14px}
+.legend{display:flex;gap:16px;margin-bottom:16px;font-size:12px;color:var(--text2)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.chart-wrap{position:relative;width:100%;height:300px}
+
+/* ── DRILL-DOWN PAGE ── */
+#drillPage{display:none;position:fixed;inset:0;background:var(--bg3);z-index:100;overflow-y:auto}
+.drill-inner{max-width:1000px;margin:0 auto;padding:28px 20px}
+.drill-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.btn-back{display:flex;align-items:center;gap:6px;padding:8px 16px;font-size:13px;font-weight:600;font-family:var(--font);background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;color:var(--text2);transition:background 0.15s}
+.btn-back:hover{background:var(--bg2);color:var(--text)}
+.drill-title{font-size:18px;font-weight:700;color:var(--text)}
+.drill-grid{display:grid;grid-template-columns:340px 1fr;gap:20px;margin-bottom:24px}
+@media(max-width:680px){.drill-grid{grid-template-columns:1fr}}
+.drill-pie-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.drill-pie-title{font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.drill-pie-wrap{position:relative;height:240px}
+.drill-summary-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.drill-summary-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border)}
+.drill-summary-label{font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:8px}
+.drill-summary-val{font-size:18px;font-weight:700}
+
+/* Table */
+.tbl-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.tbl-card-title{font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:right;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)}
+th:first-child{text-align:left}
+td{padding:10px 14px;border-bottom:1px solid var(--border);text-align:right;color:var(--text)}
+td:first-child{text-align:left;font-weight:600}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg2)}
+.tfoot-row td{background:var(--bg2);font-weight:700;border-top:2px solid var(--border2);color:var(--text)}
+.tfoot-row td:first-child{color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:0.04em}
+.val-pos{color:var(--green);font-weight:600}
+.val-neg{color:var(--red);font-weight:600}
+.val-zero{color:var(--text3)}
+</style>
+</head>
+<body>
+
+<!-- ════════════ MAIN PAGE ════════════ -->
+<div id="mainPage">
+<div class="app">
+  <div class="dash-header">
+    <div class="dash-title">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Investment Dashboard
+    </div>
+  </div>
+
+  <div id="loadingState">
+    <div class="state-box"><div class="spinner"></div><h3>Loading dashboard…</h3><p>Reading data.csv</p></div>
+  </div>
+  <div id="errorState" style="display:none">
+    <div class="state-box">
+      <h3>⚠️ Could not load data.csv</h3>
+      <p>Make sure <strong>data.csv</strong> is in the same folder as this HTML file and both are uploaded to GitHub.</p>
+    </div>
+  </div>
+
+  <div id="mainContent" style="display:none">
+    <div class="metrics" id="metrics"></div>
+    <div class="chart-card">
+      <div class="chart-title">Monthly Inflow &amp; Outflow</div>
+      <div class="chart-sub">Click on any month bar to see the product breakdown</div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#1D9E75"></span>Inflow</span>
+        <span><span class="legend-dot" style="background:#D85A30"></span>Outflow</span>
+      </div>
+      <div class="chart-wrap"><canvas id="cOverview"></canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════ DRILL-DOWN PAGE ════════════ -->
+<div id="drillPage">
+<div class="drill-inner">
+  <div class="drill-header">
+    <button class="btn-back" onclick="closeDrill()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <div class="drill-title" id="drillTitle"></div>
+  </div>
+
+  <div class="drill-grid">
+    <div class="drill-pie-card">
+      <div class="drill-pie-title">Total Inflow By Product</div>
+      <div class="drill-pie-wrap"><canvas id="cDrillPie"></canvas></div>
+    </div>
+    <div class="drill-summary-card" id="drillSummary"></div>
+  </div>
+
+  <div class="tbl-card">
+    <div class="tbl-card-title">Client Breakdown</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Mutual Funds</th>
+            <th>SP</th>
+            <th>Shares</th>
+            <th>Net Inflow</th>
+          </tr>
+        </thead>
+        <tbody id="drillTbody"></tbody>
+        <tfoot id="drillTfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── constants ──────────────────────────────────────────────
+const PRODUCTS = ['Mutual Funds', 'SP', 'Shares'];
+const PROD_COLORS = { 'Mutual Funds':'#534AB7', 'SP':'#1D9E75', 'Shares':'#D85A30' };
+const C_IN = '#1D9E75', C_OUT = '#D85A30';
+
+let allData = [];
+let mainChart = null;
+let drillChart = null;
+
+// ── helpers ────────────────────────────────────────────────
+function fmt(n){ return '₹' + Math.round(Math.abs(n)).toLocaleString('en-IN'); }
+function fmtSigned(n){ return (n < 0 ? '-' : '') + fmt(n); }
+function pct(n, total){ return total === 0 ? '0%' : (n/total*100).toFixed(1) + '%'; }
+
+function monthLabel(ym){
+  const [y,m] = ym.split('-');
+  return new Date(+y, +m-1, 1).toLocaleString('en-IN', {month:'short', year:'numeric'});
+}
+
+// normalise product names to canonical
+function canonProduct(p){
+  const lower = (p||'').toLowerCase().trim();
+  if(lower === 'mutual funds' || lower === 'mutual fund') return 'Mutual Funds';
+  if(lower === 'sp') return 'SP';
+  if(lower === 'shares' || lower === 'share') return 'Shares';
+  return p; // keep as-is if unknown
+}
+
+// ── CSV parse ──────────────────────────────────────────────
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    const row = {};
+    headers.forEach((h,i) => row[h] = vals[i] || '');
+    const type = (row['type']||'').toLowerCase();
+    return {
+      client : (row['client']||'').toUpperCase(),
+      product: canonProduct(row['product']),
+      date   : row['date']||'',
+      amount : parseFloat(row['amount'])||0,
+      type   : type
+    };
+  }).filter(r => r.client && r.date && r.amount > 0 && (r.type==='inflow'||r.type==='outflow'));
+}
+
+// ── net helper ─────────────────────────────────────────────
+function netOf(rows){ return rows.reduce((s,r) => s + (r.type==='inflow' ? r.amount : -r.amount), 0); }
+function inflowOf(rows){ return rows.filter(r=>r.type==='inflow').reduce((s,r)=>s+r.amount,0); }
+function outflowOf(rows){ return rows.filter(r=>r.type==='outflow').reduce((s,r)=>s+r.amount,0); }
+
+// ── load ──────────────────────────────────────────────────
+async function loadData(){
+  try {
+    const res = await fetch('data.csv?t=' + Date.now());
+    if(!res.ok) throw new Error();
+    allData = parseCSV(await res.text());
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    renderMain();
+  } catch(e){
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'block';
+  }
+}
+
+// ── MAIN PAGE ─────────────────────────────────────────────
+function renderMain(){
+  renderMetrics(allData);
+  renderOverview(allData);
+}
+
+function renderMetrics(rows){
+  const totalIn  = inflowOf(rows);
+  const totalOut = outflowOf(rows);
+  const totalNet = totalIn - totalOut;
+
+  function productLine(product, cssClass){
+    const pRows = rows.filter(r => r.product === product);
+    const val = netOf(pRows);
+    const color = cssClass;
+    return `<div class="mcard-row">
+      <span class="mcard-row-label">
+        <span class="mcard-row-dot" style="background:${PROD_COLORS[product]}"></span>${product}
+      </span>
+      <span class="mcard-row-val ${val>=0?'pos':'neg'}">${fmtSigned(val)}</span>
+    </div>`;
+  }
+
+  function inflowLine(product){
+    const val = inflowOf(rows.filter(r=>r.product===product));
+    return `<div class="mcard-row">
+      <span class="mcard-row-label">
+        <span class="mcard-row-dot" style="background:${PROD_COLORS[product]}"></span>${product}
+      </span>
+      <span class="mcard-row-val pos">${fmt(val)}</span>
+    </div>`;
+  }
+
+  function outflowLine(product){
+    const val = outflowOf(rows.filter(r=>r.product===product));
+    return `<div class="mcard-row">
+      <span class="mcard-row-label">
+        <span class="mcard-row-dot" style="background:${PROD_COLORS[product]}"></span>${product}
+      </span>
+      <span class="mcard-row-val neg">${fmt(val)}</span>
+    </div>`;
+  }
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="mcard">
+      <div class="mcard-top">
+        <div class="mcard-label">Total Inflow</div>
+        <div class="mcard-icon" style="background:#E1F5EE">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+      </div>
+      <div class="mcard-value pos">${fmt(totalIn)}</div>
+      <div class="mcard-divider"></div>
+      <div class="mcard-breakdown">
+        ${inflowLine('Mutual Funds')}${inflowLine('SP')}${inflowLine('Shares')}
+      </div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-top">
+        <div class="mcard-label">Total Outflow</div>
+        <div class="mcard-icon" style="background:#FAECE7">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#993C1D" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+        </div>
+      </div>
+      <div class="mcard-value neg">${fmt(totalOut)}</div>
+      <div class="mcard-divider"></div>
+      <div class="mcard-breakdown">
+        ${outflowLine('Mutual Funds')}${outflowLine('SP')}${outflowLine('Shares')}
+      </div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-top">
+        <div class="mcard-label">Net Flow</div>
+        <div class="mcard-icon" style="background:#EEEDFE">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+      </div>
+      <div class="mcard-value ${totalNet>=0?'pos':'neg'}">${fmtSigned(totalNet)}</div>
+      <div class="mcard-divider"></div>
+      <div class="mcard-breakdown">
+        ${productLine('Mutual Funds')}${productLine('SP')}${productLine('Shares')}
+      </div>
+    </div>`;
+}
+
+function renderOverview(rows){
+  if(mainChart){ mainChart.destroy(); mainChart = null; }
+  const months = [...new Set(rows.map(r => r.date.slice(0,7)))].sort();
+  const inArr  = months.map(m => inflowOf(rows.filter(r => r.date.startsWith(m))));
+  const outArr = months.map(m => outflowOf(rows.filter(r => r.date.startsWith(m))));
+
+  mainChart = new Chart(document.getElementById('cOverview'), {
+    type:'bar',
+    data:{
+      labels: months.map(monthLabel),
+      datasets:[
+        {label:'Inflow',  data:inArr,  backgroundColor:C_IN+'CC', borderRadius:5, borderSkipped:false},
+        {label:'Outflow', data:outArr, backgroundColor:C_OUT+'CC', borderRadius:5, borderSkipped:false},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': ₹'+Math.round(c.parsed.y).toLocaleString('en-IN')}}
+      },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:'#888780', font:{size:11}, maxRotation:0, autoSkip:false} },
+        y:{ grid:{color:'rgba(136,135,128,0.15)'}, ticks:{color:'#888780', font:{size:11}, callback:v=>'₹'+Math.round(v).toLocaleString('en-IN')} }
+      },
+      onClick:(evt, elements) => {
+        if(!elements.length) return;
+        const idx = elements[0].index;
+        openDrill(months[idx]);
+      }
+    }
+  });
+}
+
+// ── DRILL-DOWN PAGE ────────────────────────────────────────
+function openDrill(monthYM){
+  const monthRows = allData.filter(r => r.date.startsWith(monthYM));
+  const label = monthLabel(monthYM);
+
+  document.getElementById('drillTitle').textContent = label + ' — Product Breakdown';
+  document.getElementById('mainPage').style.display = 'none';
+  document.getElementById('drillPage').style.display = 'block';
+  window.scrollTo(0,0);
+
+  renderDrillPie(monthRows, label);
+  renderDrillSummary(monthRows);
+  renderDrillTable(monthRows);
+}
+
+function closeDrill(){
+  if(drillChart){ drillChart.destroy(); drillChart = null; }
+  document.getElementById('drillPage').style.display = 'none';
+  document.getElementById('mainPage').style.display = 'block';
+}
+
+function renderDrillPie(rows){
+  if(drillChart){ drillChart.destroy(); drillChart = null; }
+  const nets = PRODUCTS.map(p => Math.max(0, netOf(rows.filter(r => r.product === p))));
+  drillChart = new Chart(document.getElementById('cDrillPie'), {
+    type:'doughnut',
+    data:{
+      labels: PRODUCTS,
+      datasets:[{
+        data: nets,
+        backgroundColor: PRODUCTS.map(p => PROD_COLORS[p]),
+        borderWidth:2, borderColor:'#fff', hoverOffset:8
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'58%',
+      plugins:{
+        legend:{position:'bottom', labels:{font:{size:12}, color:'#5f5e5a', boxWidth:12, padding:14}},
+        tooltip:{callbacks:{label:c=>' '+c.label+': ₹'+Math.round(c.parsed).toLocaleString('en-IN')}}
+      }
+    }
+  });
+}
+
+function renderDrillSummary(rows){
+  const totalNet = netOf(rows);
+  const html = PRODUCTS.map(p => {
+    const val = netOf(rows.filter(r => r.product === p));
+    return `<div class="drill-summary-row">
+      <div class="drill-summary-label">
+        <span style="width:10px;height:10px;border-radius:50%;background:${PROD_COLORS[p]};flex-shrink:0;display:inline-block"></span>
+        ${p}
+      </div>
+      <div class="drill-summary-val" style="color:${val>=0?'#1D9E75':'#D85A30'}">${fmtSigned(val)}</div>
+    </div>`;
+  }).join('') + `<div class="drill-summary-row" style="background:var(--bg2);border-color:var(--border2)">
+    <div class="drill-summary-label" style="font-weight:700;color:var(--text)">Net Inflow</div>
+    <div class="drill-summary-val" style="color:${totalNet>=0?'#1D9E75':'#D85A30'};font-size:20px">${fmtSigned(totalNet)}</div>
+  </div>`;
+  document.getElementById('drillSummary').innerHTML = html;
+}
+
+function renderDrillTable(rows){
+  const clients = [...new Set(rows.map(r => r.client))];
+  const totalNet = netOf(rows);
+
+  // per-client net per product
+  const clientData = clients.map(c => {
+    const cRows = rows.filter(r => r.client === c);
+    const nets = {};
+    PRODUCTS.forEach(p => { nets[p] = netOf(cRows.filter(r => r.product === p)); });
+    const total = Object.values(nets).reduce((s,v) => s+v, 0);
+    return { client:c, nets, total };
+  }).sort((a,b) => b.total - a.total);
+
+  // column totals
+  const colTotals = {};
+  PRODUCTS.forEach(p => { colTotals[p] = netOf(rows.filter(r=>r.product===p)); });
+  const grandTotal = Object.values(colTotals).reduce((s,v)=>s+v,0);
+
+  function valCell(v){
+    const cls = v > 0 ? 'val-pos' : v < 0 ? 'val-neg' : 'val-zero';
+    return `<td class="${cls}">${fmtSigned(v)}</td>`;
+  }
+
+  const tbody = clientData.map(row => `<tr>
+    <td>${row.client}</td>
+    ${PRODUCTS.map(p => valCell(row.nets[p])).join('')}
+    ${valCell(row.total)}
+  </tr>`).join('');
+
+  const tfoot = `<tr class="tfoot-row">
+    <td>Total</td>
+    ${PRODUCTS.map(p => `<td style="color:${colTotals[p]>=0?'#1D9E75':'#D85A30'};font-weight:700">${fmtSigned(colTotals[p])}</td>`).join('')}
+    <td style="color:${grandTotal>=0?'#1D9E75':'#D85A30'};font-weight:700">${fmtSigned(grandTotal)}</td>
+  </tr>`;
+
+  document.getElementById('drillTbody').innerHTML = tbody;
+  document.getElementById('drillTfoot').innerHTML = tfoot;
+}
+
+loadData();
+</script>
+</body>
+</html>
