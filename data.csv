@@ -1,3 +1,5 @@
-Client,Product,date,Amount,type
+Client,Product,Date,Amount,Type
 Himanshu,Mutual Fund,15-05-2026,500000,inflow
 Thrishali,Share,29-05-2026,20000,outflow
+Manas,SP,03-06-2026,11000000,inflow
+Akshita,Shares,03-08-2026,1000000,outflow
